@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevSchoolCache", "DevSchoolCache\DevSchoolCache.csproj", "{77D24984-E1B9-4ABF-AF14-AADB320AF06D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevSchoolCacheTests", "DevSchoolCacheTests\DevSchoolCacheTests.csproj", "{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{77D24984-E1B9-4ABF-AF14-AADB320AF06D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77D24984-E1B9-4ABF-AF14-AADB320AF06D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77D24984-E1B9-4ABF-AF14-AADB320AF06D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
