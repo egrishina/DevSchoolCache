@@ -5,6 +5,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "WebApplication\WebApplication.csproj", "{5FB35AF7-7A9B-497B-971E-BEE939E16F7C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD00A983-C082-4C58-981E-FFEAB980747D}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		.dockerignore = .dockerignore
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevSchoolCacheTests", "DevSchoolCacheTests\DevSchoolCacheTests.csproj", "{9AC161B8-4546-4175-A3A4-B41CB8ACFEEE}"
 EndProject
