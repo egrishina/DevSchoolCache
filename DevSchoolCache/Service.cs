@@ -1,20 +1,39 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
 namespace DevSchoolCache;
 
-public class Service
+public class Service<TEntity> where TEntity : class
 {
-    private readonly IMemoryCacheAdapter<Item> _inMemoryCache;
-    private readonly IRedisAdapter<Item> _redis;
-    private readonly IRepository<Item> _repository;
+    private readonly IMemoryCache _inMemoryCache;
+    private readonly IRedisAdapter _redis;
+    private readonly RepositoryBase<DbContext, TEntity> _repository;
 
-    public Service(IMemoryCacheAdapter<Item> inMemoryCache, IRedisAdapter<Item> redis, IRepository<Item> repository)
+    public Service(IMemoryCache inMemoryCache, IRedisAdapter redis, RepositoryBase<DbContext, TEntity> repository)
     {
         _inMemoryCache = inMemoryCache;
         _redis = redis;
         _repository = repository;
     }
 
-    public async Task<Item> GetItem(string key)
+    public async Task<TEntity?> GetOrAddAsync(string key)
     {
-        return await _inMemoryCache.GetOrAddAsync(key);
+        if (_inMemoryCache.TryGetValue(key, out TEntity? entity))
+            return entity;
+
+        if (await _redis.TryGetValueAsync(key, out entity))
+            return entity;
+
+        entity = _repository.TryGetById(FromKeyToId(key));
+
+        _inMemoryCache.CreateEntry(key);
+        await _redis.TryAddValueAsync(key, entity);
+        
+        return entity;
+    }
+
+    private long FromKeyToId(string key)
+    {
+        return 1;
     }
 }
