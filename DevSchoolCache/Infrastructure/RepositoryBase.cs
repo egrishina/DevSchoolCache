@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevSchoolCache;
 
-public abstract class RepositoryBase<TDbContext, TEntity>
+public abstract class RepositoryBase<TDbContext, TEntity> : IRepository<TEntity>
     where TDbContext : DbContext
     where TEntity : class
 {
@@ -21,30 +21,10 @@ public abstract class RepositoryBase<TDbContext, TEntity>
     public abstract IQueryable<TEntity> GetAll();
 
     public abstract TEntity? TryGetById(long id);
+}
 
-    public async Task CreateAsync(TEntity entity)
-    {
-        await Set.AddAsync(entity);
-        await Context.SaveChangesAsync();
-    }
-
-    public async Task UpdateAsync(TEntity entity)
-    {
-        Set.Update(entity);
-        await Context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(TEntity entity)
-    {
-        Set.Remove(entity);
-        await Context.SaveChangesAsync();
-    }
-
-    public async Task DeleteRangeAsync(IEnumerable<TEntity> entities)
-    {
-        Set.RemoveRange(entities);
-        await Context.SaveChangesAsync();
-    }
-
-    public Task<int> CountAsync() => Set.CountAsync();
+public interface IRepository<out TEntity>
+{
+    TEntity? TryGetById(long id);
+    IQueryable<TEntity> GetAll();
 }

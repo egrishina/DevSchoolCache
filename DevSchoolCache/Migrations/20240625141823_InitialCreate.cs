@@ -73,11 +73,11 @@ namespace DevSchoolCache.Migrations
                 columns: new[] { "Id", "FirstName", "LastName", "MiddleName", "Birthday", "Position", "SchoolId", "Email" },
                 values: new object[,]
                 {
-                    { 1L, "John", "Doe", "A.", new DateOnly(1980, 5, 15), Position.Teacher.ToString(), 1L, "john.doe@greenwoodhigh.edu" },
-                    { 2L, "Jane", "Smith", "B.", new DateOnly(1975, 8, 20), Position.HeadTeacher.ToString(), 2L, "jane.smith@riversideelementary.edu" },
-                    { 3L, "Mark", "Johnson", "C.", new DateOnly(1990, 12, 5), Position.Janitor.ToString(), 3L, "mark.johnson@mountainview.edu" },
-                    { 4L, "Emily", "Davis", "D.", new DateOnly(1985, 3, 25), Position.Librarian.ToString(), 1L, "emily.davis@greenwoodhigh.edu" },
-                    { 5L, "Michael", "Brown", "E.", new DateOnly(1982, 7, 10), Position.Guard.ToString(), 2L, "michael.brown@riversideelementary.edu" }
+                    { 1L, "John", "Doe", "A.", new DateOnly(1980, 5, 15), Position.Teacher.ToString(), 3L, "john.doe@greenwoodhigh.edu" },
+                    { 2L, "Jane", "Smith", "B.", new DateOnly(1975, 8, 20), Position.HeadTeacher.ToString(), 1L, "jane.smith@riversideelementary.edu" },
+                    { 3L, "Mark", "Johnson", "C.", new DateOnly(1990, 12, 5), Position.Janitor.ToString(), 2L, "mark.johnson@mountainview.edu" },
+                    { 4L, "Emily", "Davis", "D.", new DateOnly(1985, 3, 25), Position.Librarian.ToString(), 2L, "emily.davis@greenwoodhigh.edu" },
+                    { 5L, "Michael", "Brown", "E.", new DateOnly(1982, 7, 10), Position.Guard.ToString(), 1L, "michael.brown@riversideelementary.edu" }
                 });
         }
 

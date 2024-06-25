@@ -1,19 +1,36 @@
-﻿namespace DevSchoolCache;
+﻿using Newtonsoft.Json;
+using StackExchange.Redis;
 
-public class RedisAdapter: IRedisAdapter
+namespace DevSchoolCache;
+
+public class RedisAdapter : IRedisAdapter
 {
-    public Task<bool> TryAddValueAsync<TValue>(string key, TValue value, TimeSpan? expiry = null)
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
+
+    public RedisAdapter(IConnectionMultiplexer connectionMultiplexer)
     {
-        throw new NotImplementedException();
+        _connectionMultiplexer = connectionMultiplexer;
     }
 
-    public Task DeleteValueAsync(string key)
+    public async Task<bool> TryAddValueAsync<TValue>(string key, TValue value, TimeSpan? expiry = null)
     {
-        throw new NotImplementedException();
+        var database = _connectionMultiplexer.GetDatabase();
+        var serializedValue = JsonConvert.SerializeObject(value);
+
+        return await database.StringSetAsync(key, serializedValue, expiry);
     }
 
-    public Task<bool> TryGetValueAsync<TValue>(string key, out TValue? value)
+    public async Task DeleteValueAsync(string key)
     {
-        throw new NotImplementedException();
+        var database = _connectionMultiplexer.GetDatabase();
+        await database.KeyDeleteAsync(key);
     }
-}
+
+    public async Task<TValue?> TryGetValueAsync<TValue>(string key)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+        var redisValue = await database.StringGetAsync(key);
+
+        return redisValue.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<TValue>(redisValue!);
+    }
+}  
