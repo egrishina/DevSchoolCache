@@ -1,13 +1,20 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using DevSchoolCache;
+using Microsoft.EntityFrameworkCore;
+using Model;
+using StackExchange.Redis;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+ConfigureDatabase(builder);
+ConfigureCache(builder);
+ConfigureServices(builder);
+    
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -16,29 +23,46 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+app.MapGet("/test-endpoint",
+        async (ISchoolRepository schoolRepo, IStaffRepository staffRepo, IConnectionMultiplexer redis) =>
+        {
+            var schools = schoolRepo.GetAll();
+            var staff = staffRepo.GetAll();
+            var redisInfo = redis.GetStatus();
+
+            return Results.Ok(new
+            {
+                Schools = schools,
+                Staff = staff,
+                RedisInfo = redisInfo
+            });
+        })
+    .WithName("TestEndpoint");
+
+app.MapControllers();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+void ConfigureDatabase(WebApplicationBuilder builder)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    builder.Services.AddDbContext<DatabaseContext>(options =>
+        options.UseNpgsql(builder.Configuration["Postgres:ConnectionString"]));
+
+    builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+    builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+}
+
+void ConfigureCache(WebApplicationBuilder builder)
+{
+    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]));
+    builder.Services.AddSingleton<IRedisAdapter, RedisAdapter>();
+
+    builder.Services.AddMemoryCache();
+}
+
+void ConfigureServices(WebApplicationBuilder builder)
+{
+    //builder.Services.AddTransient<Service<Staff>>(); blocked with the use of RepositoryBase
 }

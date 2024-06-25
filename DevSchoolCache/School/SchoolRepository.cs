@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+using Model;
 
 namespace DevSchoolCache;
 
-public class SchoolRepository(DbContext context) : RepositoryBase<DbContext, School>(context), ISchoolRepository
+public class SchoolRepository(DatabaseContext context) : RepositoryBase<DatabaseContext, School>(context), ISchoolRepository
 {
     public override IQueryable<School> GetAll() => Query;
 

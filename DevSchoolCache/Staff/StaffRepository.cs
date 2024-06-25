@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+using Model;
 
 namespace DevSchoolCache;
 
-public class StaffRepository(DbContext context) : RepositoryBase<DbContext, Staff>(context), IStaffRepository
+public class StaffRepository(DatabaseContext context) : RepositoryBase<DatabaseContext, Staff>(context), IStaffRepository
 {
     public override IQueryable<Staff> GetAll() => Query;
 

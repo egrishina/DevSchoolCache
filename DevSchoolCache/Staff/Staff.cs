@@ -14,5 +14,7 @@ public class Staff
     
     public Position Position { get; set; }
     
+    public School School { get; set; } // ???
+    
     public string Email { get; set; }
 }
