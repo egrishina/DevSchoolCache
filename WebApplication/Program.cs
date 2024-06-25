@@ -42,6 +42,12 @@ app.MapGet("/test-endpoint",
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    dbContext.Database.Migrate();
+}
+
 app.Run();
 
 void ConfigureDatabase(WebApplicationBuilder builder)

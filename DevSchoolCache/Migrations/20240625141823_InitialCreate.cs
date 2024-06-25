@@ -57,6 +57,28 @@ namespace DevSchoolCache.Migrations
                 name: "IX_Staff_SchoolId",
                 table: "Staff",
                 column: "SchoolId");
+            
+            migrationBuilder.InsertData(
+                table: "School",
+                columns: new[] { "Id", "FullName", "City", "Address", "Email" },
+                values: new object[,]
+                {
+                    { 1L, "Greenwood High School", "Greenwood", "123 Elm Street", "contact@greenwoodhigh.edu" },
+                    { 2L, "Riverside Elementary School", "Riverside", "456 Oak Avenue", "info@riversideelementary.edu" },
+                    { 3L, "Mountainview Middle School", "Mountainview", "789 Pine Road", "support@mountainview.edu" }
+                });
+            
+            migrationBuilder.InsertData(
+                table: "Staff",
+                columns: new[] { "Id", "FirstName", "LastName", "MiddleName", "Birthday", "Position", "SchoolId", "Email" },
+                values: new object[,]
+                {
+                    { 1L, "John", "Doe", "A.", new DateOnly(1980, 5, 15), Position.Teacher.ToString(), 1L, "john.doe@greenwoodhigh.edu" },
+                    { 2L, "Jane", "Smith", "B.", new DateOnly(1975, 8, 20), Position.HeadTeacher.ToString(), 2L, "jane.smith@riversideelementary.edu" },
+                    { 3L, "Mark", "Johnson", "C.", new DateOnly(1990, 12, 5), Position.Janitor.ToString(), 3L, "mark.johnson@mountainview.edu" },
+                    { 4L, "Emily", "Davis", "D.", new DateOnly(1985, 3, 25), Position.Librarian.ToString(), 1L, "emily.davis@greenwoodhigh.edu" },
+                    { 5L, "Michael", "Brown", "E.", new DateOnly(1982, 7, 10), Position.Guard.ToString(), 2L, "michael.brown@riversideelementary.edu" }
+                });
         }
 
         /// <inheritdoc />
