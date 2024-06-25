@@ -7,6 +7,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["WebApplication/WebApplication.csproj", "WebApplication/"]
+COPY ["DevSchoolCache/DevSchoolCache.csproj", "DevSchoolCache/"]
 RUN dotnet restore "WebApplication/WebApplication.csproj"
 COPY . .
 WORKDIR "/src/WebApplication"
@@ -16,8 +17,17 @@ RUN dotnet build "WebApplication.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "WebApplication.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
+# Use the .NET SDK to run migrations
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS ef-migration
+WORKDIR /app
+COPY --from=publish /app/publish .
+COPY --from=build /src /src
+WORKDIR "/app"
+RUN dotnet ef database update --no-build --project /src/DevSchoolCache --startup-project .
+
 # Final stage to run the application
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "WebApplication.dll"]
