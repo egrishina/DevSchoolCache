@@ -23,23 +23,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-app.MapGet("/test-endpoint",
-        async (ISchoolRepository schoolRepo, IStaffRepository staffRepo, IConnectionMultiplexer redis) =>
-        {
-            var schools = schoolRepo.GetAll();
-            var staff = staffRepo.GetAll();
-            var redisInfo = redis.GetStatus();
-
-            return Results.Ok(new
-            {
-                Schools = schools,
-                Staff = staff,
-                RedisInfo = redisInfo
-            });
-        })
-    .WithName("TestEndpoint");
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
@@ -55,8 +38,8 @@ void ConfigureDatabase(WebApplicationBuilder builder)
     builder.Services.AddDbContext<DatabaseContext>(options =>
         options.UseNpgsql(builder.Configuration["Postgres:ConnectionString"]));
 
-    builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
-    builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+    builder.Services.AddScoped<IRepository<School>, SchoolRepository>();
+    builder.Services.AddScoped<IRepository<Staff>, StaffRepository>();
 }
 
 void ConfigureCache(WebApplicationBuilder builder)
@@ -70,5 +53,5 @@ void ConfigureCache(WebApplicationBuilder builder)
 
 void ConfigureServices(WebApplicationBuilder builder)
 {
-    //builder.Services.AddTransient<Service<Staff>>(); blocked with the use of RepositoryBase
+    builder.Services.AddTransient(typeof(IHybridCacheService<>), typeof(HybridCacheService<>));
 }

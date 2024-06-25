@@ -1,11 +1,22 @@
+using Microsoft.EntityFrameworkCore;
 using Model;
 
 namespace DevSchoolCache;
 
-public class StaffRepository(DatabaseContext context) : RepositoryBase<DatabaseContext, Staff>(context), IStaffRepository
+public class StaffRepository : IRepository<Staff>
 {
-    public override IQueryable<Staff> GetAll() => Query;
+    public StaffRepository(DatabaseContext context)
+    {
+        Context = context;
+        Set = Context.Set<Staff>();
+    }
 
-    public override Staff? TryGetById(long id) => Query
+    private DbContext Context { get; }
+
+    private DbSet<Staff> Set { get; }
+
+    public IQueryable<Staff> GetAll() => Set;
+
+    public Staff? TryGetById(long id) => Set
         .SingleOrDefault(s => s.Id == id);
 }
