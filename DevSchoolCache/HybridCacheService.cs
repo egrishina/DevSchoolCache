@@ -2,6 +2,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DevSchoolCache;
 
+public interface IHybridCacheService<TEntity>
+{
+    Task<TEntity?> GetOrAddAsync(long id);
+}
+
 public class HybridCacheService<TEntity>(
     IMemoryCache inMemoryCache,
     IRedisAdapter redis,
@@ -19,7 +24,7 @@ public class HybridCacheService<TEntity>(
         if (entity is not null)
             return entity;
 
-        entity = repository.TryGetById(FromKeyToId(key));
+        entity = repository.TryGetById(id);
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromSeconds(60));
@@ -34,14 +39,4 @@ public class HybridCacheService<TEntity>(
     {
         return $"{typeof(TEntity).Name}.{id}";
     }
-
-    private long FromKeyToId(string key)
-    {
-        return 1;
-    }
-}
-
-public interface IHybridCacheService<TEntity>
-{
-    Task<TEntity?> GetOrAddAsync(long id);
 }
