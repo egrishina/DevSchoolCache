@@ -8,7 +8,7 @@ public interface IHybridCacheService<TEntity>
 }
 
 public class HybridCacheService<TEntity>(
-    IMemoryCache inMemoryCache,
+    ICacheWrapper  inMemoryCache,
     IRedisAdapter redis,
     IRepository<TEntity> repository) : IHybridCacheService<TEntity>
     where TEntity : class

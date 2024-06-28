@@ -47,6 +47,7 @@ void ConfigureCache(WebApplicationBuilder builder)
     builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]));
     builder.Services.AddSingleton<IRedisAdapter, RedisAdapter>();
+    builder.Services.AddSingleton<ICacheWrapper, MemoryCacheWrapper>();
 
     builder.Services.AddMemoryCache();
 }
