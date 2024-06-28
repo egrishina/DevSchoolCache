@@ -36,9 +36,9 @@ namespace DevSchoolCache.Tests
 
             // Assert
             result.Should().Be(entity);
-            _redisMock.Verify(x => x.TryGetValueAsync<TestEntity?>(It.IsAny<string>()), Times.Never);
-            _repositoryMock.Verify(x => x.TryGetById(It.IsAny<long>()), Times.Never);
-            _memoryCacheMock.Verify(x => x.TryGetValue(It.Is<string>(k => k == key), out entity), Times.Once);
+            _redisMock.Verify(x => x.TryGetValueAsync<TestEntity?>(key), Times.Never);
+            _repositoryMock.Verify(x => x.TryGetById(id), Times.Never);
+            _memoryCacheMock.Verify(x => x.TryGetValue(key, out entity), Times.Once);
         }
 
         [TestMethod]
@@ -57,8 +57,8 @@ namespace DevSchoolCache.Tests
 
             // Assert
             result.Should().Be(entity);
-            _repositoryMock.Verify(x => x.TryGetById(It.IsAny<long>()), Times.Never);
-            _memoryCacheMock.Verify(x => x.TryGetValue(It.Is<string>(k => k == key), out entity), Times.Once);
+            _repositoryMock.Verify(x => x.TryGetById(id), Times.Never);
+            _memoryCacheMock.Verify(x => x.TryGetValue(key, out entity), Times.Once);
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ namespace DevSchoolCache.Tests
             // Assert
             result.Should().Be(entity);
 
-            _memoryCacheMock.Verify(x => x.TryGetValue(It.Is<string>(k => k == key), out entity), Times.Once);
+            _memoryCacheMock.Verify(x => x.TryGetValue(key, out entity), Times.Once);
             _memoryCacheMock.Verify(x => x.Set(key, entity, It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
             _redisMock.Verify(x => x.TryAddValueAsync(key, entity, TimeSpan.FromMinutes(5)), Times.Once);
         }
@@ -101,8 +101,8 @@ namespace DevSchoolCache.Tests
             // Assert
             result.Should().BeNull();
             
-            _memoryCacheMock.Verify(x => x.Set(key, It.IsAny<TestEntity>(), It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
-            _redisMock.Verify(x => x.TryAddValueAsync(key, It.IsAny<TestEntity>(), TimeSpan.FromMinutes(5)), Times.Once);
+            _memoryCacheMock.Verify(x => x.Set(key, It.Is<TestEntity?>(e => e == null), It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
+            _redisMock.Verify(x => x.TryAddValueAsync(key, It.Is<TestEntity?>(e => e == null), TimeSpan.FromMinutes(5)), Times.Once);
         }
     }
 
