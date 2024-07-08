@@ -58,7 +58,7 @@ namespace DevSchoolCache.Tests
         }
 
         [TestMethod]
-        public async Task GetOrAddAsync_ShouldReturnEntity_FromRepository()
+        public async Task GetOrAddAsync_ShouldReturnEntity_FromValueFactory()
         {
             // Arrange
             var id = 1;
@@ -97,6 +97,26 @@ namespace DevSchoolCache.Tests
             
             _memoryCacheMock.Verify(x => x.Set(key, It.Is<TestEntity?>(e => e == null), It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
             _redisMock.Verify(x => x.TryAddValueAsync(key, It.Is<TestEntity?>(e => e == null), TimeSpan.FromMinutes(5)), Times.Once);
+        }
+        
+        [TestMethod]
+        public async Task GetOrAddAsync_ReturnFromRedis_WhenNoValueInMemory()
+        {
+            // Arrange
+            var id = 1;
+            var key = $"TestEntity.{id}";
+
+            _memoryCacheMock.Setup(x => x.TryGetValue(key, out It.Ref<TestEntity?>.IsAny)).Returns(false);
+            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync(new CachedEntity<TestEntity?>(null, true));
+
+            // Act
+            var result = await _service.GetOrAddAsync(FromIdToKey(id), () => null);
+
+            // Assert
+            result.Should().BeNull();
+            
+            _redisMock.Verify(x => x.TryGetValueAsync<TestEntity?>(key), Times.Once);
+            _memoryCacheMock.Verify(x => x.Set(key, It.Is<TestEntity?>(e => e == null), It.IsAny<MemoryCacheEntryOptions>()), Times.Never);
         }
         
         private static string FromIdToKey(long id)

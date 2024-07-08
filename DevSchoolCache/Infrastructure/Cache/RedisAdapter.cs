@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace DevSchoolCache;
@@ -7,12 +6,10 @@ namespace DevSchoolCache;
 public class RedisAdapter : IRedisAdapter
 {
     private readonly IConnectionMultiplexer _connectionMultiplexer;
-    private readonly Logger<RedisAdapter> _logger;
 
-    public RedisAdapter(IConnectionMultiplexer connectionMultiplexer, Logger<RedisAdapter> logger)
+    public RedisAdapter(IConnectionMultiplexer connectionMultiplexer)
     {
         _connectionMultiplexer = connectionMultiplexer;
-        _logger = logger;
     }
 
     public async Task<bool> TryAddValueAsync<TValue>(string key, TValue? value, TimeSpan? expiry = null)
@@ -34,21 +31,21 @@ public class RedisAdapter : IRedisAdapter
         var database = _connectionMultiplexer.GetDatabase();
         var redisValue = await database.StringGetAsync(key);
 
-        if (redisValue == RedisValue.Null)
+        if (redisValue == RedisValue.Null) // если по ключу ничего нет
             return new CachedEntity<TValue?>(default, false);
-
-        if (!redisValue.HasValue)
-            return new CachedEntity<TValue?>(default, true);
 
         try
         {
             var deserializeObject = JsonSerializer.Deserialize<TValue>(redisValue!);
 
+            if (deserializeObject is null) // если закеширован NUll
+                return new CachedEntity<TValue?>(default, true);
+            
             return new CachedEntity<TValue?>(deserializeObject, true);
         }
         catch (JsonException e)
         {
-            _logger.LogError($"Cant deserialize: {redisValue}. Error: ", e);
+            // сломан контракт
             return new CachedEntity<TValue?>(default, false);
         }
     }
