@@ -17,9 +17,9 @@ public class HybridCacheService<TEntity>(
         if (inMemoryCache.TryGetValue(key, out TEntity? entity))
             return entity;
 
-        entity = await redis.TryGetValueAsync<TEntity?>(key);
-        if (entity is not null)
-            return entity;
+        var cachedEntity = await redis.TryGetValueAsync<TEntity?>(key);
+        if (cachedEntity.Exists)
+            return cachedEntity.Entity;
 
         entity = valueFactory();
 

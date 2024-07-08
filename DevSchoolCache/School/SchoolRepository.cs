@@ -26,7 +26,7 @@ public class SchoolRepository : IRepository<School>
         return await _cacheService.GetOrAddAsync(key, () => Set.SingleOrDefault(s => s.Id == id));
     }
     
-    private string FromIdToKey(long id)
+    private static string FromIdToKey(long id)
     {
         return $"{typeof(School).Name}.{id}";
     }

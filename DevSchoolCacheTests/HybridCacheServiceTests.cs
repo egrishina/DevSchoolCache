@@ -9,7 +9,6 @@ namespace DevSchoolCache.Tests
     {
         private Mock<ICacheWrapper> _memoryCacheMock;
         private Mock<IRedisAdapter> _redisMock;
-        private Mock<IRepository<TestEntity>> _repositoryMock;
         private IHybridCacheService<TestEntity> _service;
 
         [TestInitialize]
@@ -17,7 +16,6 @@ namespace DevSchoolCache.Tests
         {
             _memoryCacheMock = new Mock<ICacheWrapper>();
             _redisMock = new Mock<IRedisAdapter>();
-            _repositoryMock = new Mock<IRepository<TestEntity>>();
             _service = new HybridCacheService<TestEntity>(_memoryCacheMock.Object, _redisMock.Object);
         }
 
@@ -32,12 +30,11 @@ namespace DevSchoolCache.Tests
             _memoryCacheMock.Setup(x => x.TryGetValue(key, out entity)).Returns(true);
 
             // Act
-            var result = await _service.GetOrAddAsync(id);
+            var result = await _service.GetOrAddAsync(FromIdToKey(id), () => null);
 
             // Assert
             result.Should().Be(entity);
             _redisMock.Verify(x => x.TryGetValueAsync<TestEntity?>(key), Times.Never);
-            _repositoryMock.Verify(x => x.TryGetById(id), Times.Never);
             _memoryCacheMock.Verify(x => x.TryGetValue(key, out entity), Times.Once);
         }
 
@@ -50,14 +47,13 @@ namespace DevSchoolCache.Tests
             var entity = new TestEntity { Id = id };
 
             _memoryCacheMock.Setup(x => x.TryGetValue(key, out It.Ref<TestEntity?>.IsAny)).Returns(false);
-            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync(entity);
+            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync(new CachedEntity<TestEntity?>(entity, true));
 
             // Act
-            var result = await _service.GetOrAddAsync(id);
+            var result = await _service.GetOrAddAsync(FromIdToKey(id), () => null);
 
             // Assert
             result.Should().Be(entity);
-            _repositoryMock.Verify(x => x.TryGetById(id), Times.Never);
             _memoryCacheMock.Verify(x => x.TryGetValue(key, out entity), Times.Once);
         }
 
@@ -70,11 +66,10 @@ namespace DevSchoolCache.Tests
             var entity = new TestEntity { Id = id };
 
             _memoryCacheMock.Setup(x => x.TryGetValue(key, out It.Ref<TestEntity?>.IsAny)).Returns(false);
-            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync((TestEntity?)null);
-            _repositoryMock.Setup(x => x.TryGetById(id)).Returns(entity);
+            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync(new CachedEntity<TestEntity?>(null, false));
 
             // Act
-            var result = await _service.GetOrAddAsync(id);
+            var result = await _service.GetOrAddAsync(FromIdToKey(id), () => entity);
 
             // Assert
             result.Should().Be(entity);
@@ -92,17 +87,21 @@ namespace DevSchoolCache.Tests
             var key = $"TestEntity.{id}";
 
             _memoryCacheMock.Setup(x => x.TryGetValue(key, out It.Ref<TestEntity?>.IsAny)).Returns(false);
-            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync((TestEntity?)null);
-            _repositoryMock.Setup(x => x.TryGetById(id)).Returns((TestEntity?)null);
+            _redisMock.Setup(x => x.TryGetValueAsync<TestEntity?>(key)).ReturnsAsync(new CachedEntity<TestEntity?>(null, false));
 
             // Act
-            var result = await _service.GetOrAddAsync(id);
+            var result = await _service.GetOrAddAsync(FromIdToKey(id), () => null);
 
             // Assert
             result.Should().BeNull();
             
             _memoryCacheMock.Verify(x => x.Set(key, It.Is<TestEntity?>(e => e == null), It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
             _redisMock.Verify(x => x.TryAddValueAsync(key, It.Is<TestEntity?>(e => e == null), TimeSpan.FromMinutes(5)), Times.Once);
+        }
+        
+        private static string FromIdToKey(long id)
+        {
+            return $"{nameof(TestEntity)}.{id}";
         }
     }
 
