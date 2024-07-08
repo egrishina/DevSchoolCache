@@ -4,19 +4,16 @@ namespace DevSchoolCache;
 
 public interface IHybridCacheService<TEntity>
 {
-    Task<TEntity?> GetOrAddAsync(long id);
+    Task<TEntity?> GetOrAddAsync(string key,  Func<TEntity?> valueFactory);
 }
 
 public class HybridCacheService<TEntity>(
-    ICacheWrapper  inMemoryCache,
-    IRedisAdapter redis,
-    IRepository<TEntity> repository) : IHybridCacheService<TEntity>
+    ICacheWrapper inMemoryCache,
+    IRedisAdapter redis) : IHybridCacheService<TEntity>
     where TEntity : class
 {
-    public async Task<TEntity?> GetOrAddAsync(long id)
+    public async Task<TEntity?> GetOrAddAsync(string key, Func<TEntity?> valueFactory)
     {
-        var key = FromIdToKey(id);
-        
         if (inMemoryCache.TryGetValue(key, out TEntity? entity))
             return entity;
 
@@ -24,19 +21,14 @@ public class HybridCacheService<TEntity>(
         if (entity is not null)
             return entity;
 
-        entity = repository.TryGetById(id);
+        entity = valueFactory();
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromSeconds(60));
 
         inMemoryCache.Set(key, entity, cacheEntryOptions);
         await redis.TryAddValueAsync(key, entity, TimeSpan.FromMinutes(5));
-        
-        return entity;
-    }
 
-    private string FromIdToKey(long id)
-    {
-        return $"{typeof(TEntity).Name}.{id}";
+        return entity;
     }
 }

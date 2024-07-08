@@ -5,9 +5,11 @@ namespace DevSchoolCache;
 
 public class StaffRepository : IRepository<Staff>
 {
-    public StaffRepository(DatabaseContext context)
+    private IHybridCacheService<Staff> _cacheService;
+    public StaffRepository(DatabaseContext context, IHybridCacheService<Staff> cacheService)
     {
         Context = context;
+        _cacheService = cacheService;
         Set = Context.Set<Staff>();
     }
 
@@ -17,6 +19,14 @@ public class StaffRepository : IRepository<Staff>
 
     public IQueryable<Staff> GetAll() => Set;
 
-    public Staff? TryGetById(long id) => Set
-        .SingleOrDefault(s => s.Id == id);
+    public async Task<Staff?> TryGetById(long id)
+    {
+        var key = FromIdToKey(id);
+        return await _cacheService.GetOrAddAsync(key, () => Set.SingleOrDefault(s => s.Id == id));
+    }
+    
+    private string FromIdToKey(long id)
+    {
+        return $"{typeof(Staff).Name}.{id}";
+    }
 }

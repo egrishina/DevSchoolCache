@@ -18,7 +18,7 @@ namespace DevSchoolCache.Tests
             _memoryCacheMock = new Mock<ICacheWrapper>();
             _redisMock = new Mock<IRedisAdapter>();
             _repositoryMock = new Mock<IRepository<TestEntity>>();
-            _service = new HybridCacheService<TestEntity>(_memoryCacheMock.Object, _redisMock.Object, _repositoryMock.Object);
+            _service = new HybridCacheService<TestEntity>(_memoryCacheMock.Object, _redisMock.Object);
         }
 
         [TestMethod]
@@ -28,7 +28,7 @@ namespace DevSchoolCache.Tests
             var id = 1;
             var key = $"TestEntity.{id}";
             var entity = new TestEntity { Id = id };
-
+            
             _memoryCacheMock.Setup(x => x.TryGetValue(key, out entity)).Returns(true);
 
             // Act

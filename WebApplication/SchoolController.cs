@@ -5,14 +5,14 @@ namespace SchoolController;
 
 [ApiController]
 public class SchoolController(
-    IHybridCacheService<School> schoolService,
-    IHybridCacheService<Staff> staffService)
+    IRepository<School> schoolRepository,
+    IRepository<Staff> staffRepository)
     : ControllerBase
 {
     [HttpGet("/school/{id}")]
     public async Task<ActionResult<SchoolDto>> GetSchoolById(long id)
     {
-        var school = await schoolService.GetOrAddAsync(id);
+        var school = await schoolRepository.TryGetById(id);
         if (school is null)
             return NotFound();
 
@@ -22,11 +22,11 @@ public class SchoolController(
     [HttpGet("/school/byStaff/{id}")]
     public async Task<ActionResult<SchoolDto>> GetSchoolByStaffId(long id)
     {
-        var staff = await staffService.GetOrAddAsync(id);
+        var staff = await staffRepository.TryGetById(id);
         if (staff is null)
             return NotFound();
 
-        var school = await schoolService.GetOrAddAsync(staff.SchoolId);
+        var school = await schoolRepository.TryGetById(staff.SchoolId);
 
         if (school == null)
         {
@@ -39,7 +39,7 @@ public class SchoolController(
     [HttpGet("/staff/{id}")]
     public async Task<ActionResult<StaffDto>> GetStaffById(long id)
     {
-        var staff = await staffService.GetOrAddAsync(id);
+        var staff = await staffRepository.TryGetById(id);
         if (staff is null)
             return NotFound();
 

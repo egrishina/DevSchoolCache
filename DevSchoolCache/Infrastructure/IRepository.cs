@@ -1,7 +1,7 @@
 namespace DevSchoolCache;
 
-public interface IRepository<out TEntity>
+public interface IRepository<TEntity>
 {
-    TEntity? TryGetById(long id);
+    Task<TEntity?> TryGetById(long id);
     IQueryable<TEntity> GetAll();
 }
